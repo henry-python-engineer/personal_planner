@@ -9,15 +9,15 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.http import MediaIoBaseDownload
 
 
-def get_creds():
+def get_creds(account_type):
     # If modifying these scopes, delete the file token.pickle.
     SCOPES = ['https://www.googleapis.com/auth/drive']  # deleted "".metadata.readonly" from guide
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
     # time.
-    if os.path.exists('config/token.pickle'):  # from guide, add config/
-        with open('config/token.pickle', 'rb') as token:
+    if os.path.exists('config/token_{}.pickle'.format(account_type)):  # from guide, add config/
+        with open('config/token_{}.pickle'.format(account_type), 'rb') as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
@@ -25,10 +25,10 @@ def get_creds():
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'config/credentials.json', SCOPES)
+                'config/credentials_{}.json'.format(account_type), SCOPES)
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
-        with open('config/token.pickle', 'wb') as token:
+        with open('config/token_{}.pickle'.format(account_type), 'wb') as token:
             pickle.dump(creds, token)
     return creds
 
@@ -108,11 +108,13 @@ def download_file(service, **kwargs):
 
 
 def main():
-    creds = get_creds()
+    account_type = "daily"
+    creds = get_creds(account_type)
     service = get_service_client(creds)
     file_list = get_file_list(service, folder_name="test1")
-    upload_file(service, local_directory='data', local_file_name='upload_test.csv', remote_directory='test1', remote_file_name='new_name1.csv')
-    download_file(service, local_directory='data', local_file_name='download_test.csv', remote_directory='test1', remote_file_name='new_name1.csv')
+    # print(file_list)
+    # upload_file(service, local_directory='data', local_file_name='upload_test.csv', remote_directory='test1', remote_file_name='new_name1.csv')
+    # download_file(service, local_directory='data', local_file_name='download_test.csv', remote_directory='test1', remote_file_name='new_name1.csv')
 
 
 if __name__ == '__main__':
